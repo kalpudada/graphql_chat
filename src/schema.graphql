@@ -6,6 +6,8 @@ type Mutation {
   togglePublishPost(id: Int!): Post
   login(email: String, password: String): User!
   createRoom(data: RoomCreateInput): Room
+  addParticipant(data: AddParticipantInput): Room
+  sendMessage(data: AddMessageInput): Message
 }
 
 type Post {
@@ -20,8 +22,13 @@ type Post {
 }
 
 type Room {
-  id: Int!,
+  id: Int!
   roomName: String!
+}
+
+type Message {
+  id: Int!
+  message: String!
 }
 
 input RoomCreateInput {
@@ -83,7 +90,17 @@ input UserUniqueInput {
 
 scalar DateTime
 
-type Subscription{
+type Subscription {
   # newPost: Post
   postCreated: Post
+}
+
+input AddParticipantInput {
+  roomId: Int!
+  participants: [Int]!
+}
+
+input AddMessageInput {
+  roomId: Int!
+  message: String!
 }

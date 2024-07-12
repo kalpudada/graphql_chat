@@ -11,18 +11,21 @@ export interface Context {
   prisma: PrismaClient
   pubsub: PubSub
   req: any
+  userId: number
 }
 
 export const context: Context = {
   prisma: prisma,
   pubsub: pubsub,
-  req: request
+  req: request,
+  userId: 0
 }
 
 export function createContext(req: any) {
   return {
     ...req,
     prisma,
-    pubsub
+    pubsub,
+    userId: 0
   }
 }

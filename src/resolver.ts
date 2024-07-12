@@ -112,7 +112,8 @@ export const resolvers = {
       args: { data: PostCreateInput; authorEmail: string },
       context,
     ) => {
-      const userId = getUserId(context)
+      console.log(`inside_createDraft_${context.userId}`);
+      const userId = context.userId || getUserId(context)
       return prisma.post.create({
         data: {
           title: args.data.title,
@@ -177,9 +178,11 @@ export const resolvers = {
       })
     },
     createRoom: (_parent, args: { data: RoomCreateInput }, context) => {
+      const userId = context.userId || getUserId(context)
       const participantData = args.data.participants.map((p) => {
         return { userId: p }
       })
+      participantData.push({userId});
       return prisma.room.create({
         data: {
           roomName: args.data.roomName,
@@ -189,10 +192,32 @@ export const resolvers = {
           }
         }
       })
-      // return prisma.post.delete({
-      //   where: { id: args.id },
-      // })
     },
+    addParticipant: async (_parent, args: { data: AddParticipantInput }, context) => {
+      const userId = context.userId || getUserId(context)
+      const participantData = args.data.participants.map((p) => {
+        return { userId: p }
+      })
+
+      const res = await prisma.room.update({
+        where: {
+          id: args.data.roomId
+        },
+        data: { Participant: { create: participantData } }
+      })
+      return res
+    },
+    sendMessage: async (_parent, args: { data: AddMessageInput }, context) => {
+      const userId = context.userId || getUserId(context)
+      const res = prisma.message.create({
+        data: {
+          roomId: args.data.roomId,
+          message: args.data.message,
+          userId
+        }
+      })
+      return res
+    }
   },
   DateTime: DateTimeResolver,
   Post: {
@@ -262,4 +287,14 @@ interface RoomCreateInput {
 interface UserSignInInput {
   email: string
   password: string
+}
+
+interface AddParticipantInput {
+  roomId: number
+  participants: [number]
+}
+
+interface AddMessageInput {
+  roomId: number
+  message: string
 }

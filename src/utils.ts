@@ -16,5 +16,5 @@ export function getUserId(context: Context) {
         const token = authHeader.replace('Bearer ', '')
         const verifiedToken = verify(token, APP_SECRET) as Token
         return verifiedToken && Number(verifiedToken.userId)
-    }
+    } else return 0
 }
