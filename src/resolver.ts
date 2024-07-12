@@ -112,13 +112,15 @@ export const resolvers = {
       args: { data: PostCreateInput; authorEmail: string },
       context,
     ) => {
+      const userId = getUserId(context)
       return prisma.post.create({
         data: {
           title: args.data.title,
           content: args.data.content,
-          author: {
-            connect: { email: args.authorEmail },
-          },
+          authorId: userId
+          // author: {
+          //   connect: { email: args.authorEmail },
+          // },
         },
       }).then((response) => {
         console.log(response);

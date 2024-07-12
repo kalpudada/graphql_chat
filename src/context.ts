@@ -18,3 +18,11 @@ export const context: Context = {
   pubsub: pubsub,
   req: request
 }
+
+export function createContext(req: any) {
+  return {
+    ...req,
+    prisma,
+    pubsub
+  }
+}

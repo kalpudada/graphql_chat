@@ -2,9 +2,13 @@
 // import { createServer } from 'node:http'
 // import { typeDefs } from './schema'
 import { resolvers } from './resolver'
-import { Context,context} from './context'
-import { ApolloServer } from '@apollo/server';
+import { Context, context, createContext } from './context'
+import { getUserId } from './utils';
+import { permissions } from './permissions'
 
+import { ApolloServer } from '@apollo/server';
+import { applyMiddleware } from 'graphql-middleware'
+import { GraphQLError } from 'graphql';
 // import { ApolloServer } from 'apollo-server'
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { expressMiddleware } from '@apollo/server/express4';
@@ -27,7 +31,7 @@ const PORT = process.env.PORT || 4000
 
 
 const typeDefs = gql(
-  readFileSync(resolve("src","schema.graphql"), {
+  readFileSync(resolve("src", "schema.graphql"), {
     encoding: "utf-8",
   })
 );
@@ -42,7 +46,9 @@ const typeDefs = gql(
 
 const app = express()
 const httpServer = createServer(app)
+
 const schema = makeExecutableSchema({ typeDefs, resolvers });
+const schemaWithMiddleware = applyMiddleware(schema, permissions)
 async function start() {
   /** Create WS Server */
   const wsServer = new WebSocketServer({
@@ -53,8 +59,9 @@ async function start() {
   /** hand-in created schema and have the WS Server start listening */
   const serverCleanup = useServer({ schema, context }, wsServer)
 
+  // Set up ApolloServer.
   const server = new ApolloServer<Context>({
-    schema,
+    schema: schemaWithMiddleware,
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
       {
@@ -70,11 +77,29 @@ async function start() {
   })
 
   await server.start()
-  app.use('/graphql', cors<cors.CorsRequest>(), bodyParser.json(), expressMiddleware(server, { context: async () => context }));
+  app.use('/graphql', cors<cors.CorsRequest>(), bodyParser.json(), expressMiddleware(server, {
+    context: createContext
+    //  async ({ req, res }) => {
+    //   // get the user token from the headers
+    //   // const token = req.headers.authorization || '';
+
+    //   // try to retrieve a user with the token
+    //   const user = getUserId(req);
+    //   if (!user)
+    //     throw new GraphQLError('User is not authenticated', {
+    //       extensions: {
+    //         code: 'UNAUTHENTICATED',
+    //         http: { status: 401 },
+    //       },
+    //     });
+    //   return { user, ...context };
+    // },
+  }))
+  // context }));
 
   httpServer.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:4000/graphql`)
-    console.log(`⏰ Subscriptions ready at http://localhost:4000/graphql`)
+    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`)
+    console.log(`⏰ Subscriptions ready at http://localhost:${PORT}/graphql`)
     console.log(
       `⭐️ See sample queries: http://pris.ly/e/ts/graphql-subscriptions#using-the-graphql-api`,
     )
