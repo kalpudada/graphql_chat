@@ -1,5 +1,8 @@
 import { DateTimeResolver } from 'graphql-scalars'
 import { prisma, context } from './context'
+import { APP_SECRET, getUserId } from './utils'
+import { compare, hash } from 'bcryptjs'
+import { sign } from 'jsonwebtoken'
 
 export const resolvers = {
   Query: {
@@ -60,24 +63,49 @@ export const resolvers = {
     },
   },
   Mutation: {
-    signupUser: (
+    signupUser: async (
       _parent,
       args: { data: UserCreateInput },
       context,
     ) => {
+      const hashedPassword = await hash(args.data.password, 10)
       const postData = args.data.posts?.map((post) => {
         return { title: post.title, content: post.content || undefined }
       })
-      //   console.log(prisma);
-      return prisma.user.create({
+      const user = await prisma.user.create({
         data: {
           name: args.data.name,
           email: args.data.email,
+          password: hashedPassword,
           posts: {
             create: postData,
           },
         },
       })
+      console.log(user);
+      return { token: sign({ userId: user.id }, APP_SECRET), ...user };
+    },
+    login: async (
+      _parent,
+      args: UserSignInInput, // { email: string, password: string },
+      context,
+    ) => {
+      const user = await context.prisma.user.findUnique({
+        where: {
+          email: args.email,
+        },
+      })
+      if (!user) {
+        throw new Error(`No user found for email: ${args.email}`)
+      }
+      const passwordValid = await compare(args.password, user.password)
+      if (!passwordValid) {
+        throw new Error('Invalid password')
+      }
+      return {
+        token: sign({ userId: user.id }, APP_SECRET),
+        ...user,
+      }
     },
     createDraft: (
       _parent,
@@ -148,15 +176,15 @@ export const resolvers = {
     },
     createRoom: (_parent, args: { data: RoomCreateInput }, context) => {
       const participantData = args.data.participants.map((p) => {
-        return {userId: p}
+        return { userId: p }
       })
       return prisma.room.create({
         data: {
           roomName: args.data.roomName,
           createdBy: 1,
-          Participant:{
-            create : participantData
-          } 
+          Participant: {
+            create: participantData
+          }
         }
       })
       // return prisma.post.delete({
@@ -219,6 +247,7 @@ interface PostCreateInput {
 
 interface UserCreateInput {
   email: string
+  password: string
   name?: string
   posts?: PostCreateInput[]
 }
@@ -226,4 +255,9 @@ interface UserCreateInput {
 interface RoomCreateInput {
   roomName: string
   participants: [number]
+}
+
+interface UserSignInInput {
+  email: string
+  password: string
 }

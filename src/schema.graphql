@@ -4,7 +4,7 @@ type Mutation {
   incrementPostViewCount(id: Int!): Post
   signupUser(data: UserCreateInput!): User!
   togglePublishPost(id: Int!): Post
-
+  login(email: String, password: String): User!
   createRoom(data: RoomCreateInput): Room
 }
 
@@ -57,15 +57,23 @@ enum SortOrder {
 
 type User {
   email: String!
+  password: String!
   id: Int!
   name: String
   posts: [Post!]!
+  token: String
 }
 
 input UserCreateInput {
   email: String!
+  password: String!
   name: String
   posts: [PostCreateInput!]
+}
+
+input UserSignInInput {
+  email: String!
+  password: String!
 }
 
 input UserUniqueInput {
