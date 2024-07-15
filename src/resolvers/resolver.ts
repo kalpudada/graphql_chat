@@ -1,9 +1,9 @@
 import { DateTimeResolver } from 'graphql-scalars'
-import { prisma, context } from './context'
-import { APP_SECRET, getUserId } from './utils'
+import { prisma, context } from '../context'
+import { APP_SECRET, getUserId } from '../utils/utils'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
-import { CONSTANT } from './constant'
+import { CONSTANT } from '../constants/constant'
 
 export const resolvers = {
   Query: {

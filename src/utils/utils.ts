@@ -1,5 +1,5 @@
 import { verify } from 'jsonwebtoken'
-import { Context } from './context'
+import { Context } from '../context'
 import { RequestOptions } from 'http'
 
 export const APP_SECRET = process.env.APP_SECRET || 'appsecret321'

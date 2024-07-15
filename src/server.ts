@@ -1,9 +1,9 @@
 // import { createYoga } from 'graphql-yoga'
 // import { createServer } from 'node:http'
 // import { typeDefs } from './schema'
-import { resolvers } from './resolver'
+import { resolvers } from './resolvers/resolver'
 import { Context, context, createContext } from './context'
-import { getUserId } from './utils';
+import { getUserId } from './utils/utils';
 import { permissions } from './permissions'
 
 import { ApolloServer } from '@apollo/server';

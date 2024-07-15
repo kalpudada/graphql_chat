@@ -1,5 +1,5 @@
 import { rule, shield } from 'graphql-shield'
-import { getUserId } from '../utils'
+import { getUserId } from '../utils/utils'
 import { Context, prisma } from '../context'
 
 const rules = {
