@@ -1,0 +1,9 @@
+export const CONSTANT = {
+    SUBSCRIPTION: {
+        POST_CREATED: 'POST_CREATED',
+        ADDED_TO_ROOM: 'ADDED_TO_ROOM',
+        NEW_MESSAGE: 'NEW_MESSAGE',
+        USER_IS_ONLINE: 'USER_IS_ONLINE',
+        USER_IS_TYPING: 'USER_IS_TYPING'
+    }
+}

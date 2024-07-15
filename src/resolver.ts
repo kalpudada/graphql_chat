@@ -3,6 +3,7 @@ import { prisma, context } from './context'
 import { APP_SECRET, getUserId } from './utils'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
+import { CONSTANT } from './constant'
 
 export const resolvers = {
   Query: {
@@ -124,8 +125,8 @@ export const resolvers = {
           // },
         },
       }).then((response) => {
-        console.log(response);
-        context.pubsub.publish('POST_CREATED', {
+        // console.log(response);
+        context.pubsub.publish(CONSTANT.SUBSCRIPTION.POST_CREATED, {
           postCreated: response,
         });
         return response
@@ -205,6 +206,9 @@ export const resolvers = {
         },
         data: { Participant: { create: participantData } }
       })
+      context.pubsub.publish(CONSTANT.SUBSCRIPTION.ADDED_TO_ROOM, {
+        addedToRoom: res,
+      });
       return res
     },
     sendMessage: async (_parent, args: { data: AddMessageInput }, context) => {
@@ -216,6 +220,9 @@ export const resolvers = {
           userId
         }
       })
+      context.pubsub.publish(CONSTANT.SUBSCRIPTION.NEW_MESSAGE, {
+        newMessage: res,
+      });
       return res
     }
   },
@@ -239,17 +246,22 @@ export const resolvers = {
     },
   },
   Subscription: {
-    // hello: {
-    //   subscribe: async function* () {
-    //     for await (const word of ['Hello', 'Bonjour', 'Ciao']) {
-    //       yield { hello: word };
-    //     }
-    //   },
-    // },
     postCreated: {
       // More on pubsub below
-      subscribe: () => context.pubsub.asyncIterator(['POST_CREATED']),
+      subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.POST_CREATED]),
     },
+    addedToRoom: {
+      subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.ADDED_TO_ROOM]),
+    },
+    newMessage: {
+      subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.NEW_MESSAGE]),
+    },
+    userIsOnline: {
+      subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.USER_IS_ONLINE]),
+    },
+    userIsTyping: {
+      subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.USER_IS_TYPING]),
+    }
   },
 }
 

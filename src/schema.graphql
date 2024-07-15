@@ -93,6 +93,10 @@ scalar DateTime
 type Subscription {
   # newPost: Post
   postCreated: Post
+  addedToRoom: Room
+  newMessage: Message
+  userIsOnline: User
+  userIsTyping: User
 }
 
 input AddParticipantInput {
