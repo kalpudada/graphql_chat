@@ -1,15 +1,3 @@
-type Mutation {
-  createDraft(authorEmail: String!, data: PostCreateInput!): Post
-  deletePost(id: Int!): Post
-  incrementPostViewCount(id: Int!): Post
-  signupUser(data: UserCreateInput!): User!
-  togglePublishPost(id: Int!): Post
-  login(email: String, password: String): User!
-  createRoom(data: RoomCreateInput): Room
-  addParticipant(data: AddParticipantInput): Room
-  sendMessage(data: AddMessageInput): Message
-}
-
 type Post {
   author: User
   content: String
@@ -29,16 +17,6 @@ type Room {
 type Message {
   id: Int!
   message: String!
-}
-
-input RoomCreateInput {
-  roomName: String!
-  participants: [Int]!
-}
-
-input PostCreateInput {
-  content: String
-  title: String!
 }
 
 input PostOrderByUpdatedAtInput {
@@ -71,40 +49,9 @@ type User {
   token: String
 }
 
-input UserCreateInput {
-  email: String!
-  password: String!
-  name: String
-  posts: [PostCreateInput!]
-}
-
-input UserSignInInput {
-  email: String!
-  password: String!
-}
-
 input UserUniqueInput {
   email: String
   id: Int
 }
 
 scalar DateTime
-
-type Subscription {
-  # newPost: Post
-  postCreated: Post
-  addedToRoom: Room
-  newMessage: Message
-  userIsOnline: User
-  userIsTyping: User
-}
-
-input AddParticipantInput {
-  roomId: Int!
-  participants: [Int]!
-}
-
-input AddMessageInput {
-  roomId: Int!
-  message: String!
-}

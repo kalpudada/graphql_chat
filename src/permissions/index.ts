@@ -51,12 +51,12 @@ export const permissions = shield({
     draftsByUser: rules.isAuthenticatedUser,
     postById: rules.isAuthenticatedUser,
   },
-  Mutation: {
-    createDraft: rules.isAuthenticatedUser,
-    deletePost: rules.isPostOwner,
-    incrementPostViewCount: rules.isAuthenticatedUser,
-    togglePublishPost: rules.isPostOwner,
-    sendMessage: rules.isRoomMember,
-    createRoom: rules.isAuthenticatedUser,
-  },
+  // Mutation: {
+  //   createDraft: rules.isAuthenticatedUser,
+  //   deletePost: rules.isPostOwner,
+  //   incrementPostViewCount: rules.isAuthenticatedUser,
+  //   togglePublishPost: rules.isPostOwner,
+  //   sendMessage: rules.isRoomMember,
+  //   createRoom: rules.isAuthenticatedUser,
+  // },
 })
