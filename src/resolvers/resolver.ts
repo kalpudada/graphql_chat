@@ -7,8 +7,8 @@ import { CONSTANT } from '../constants/constant'
 
 export const resolvers = {
   Query: {
-    allUsers: (_parent, _args, context) => {
-      return prisma.user.findMany()
+    allUsers: async (_parent, _args, context) => {
+      return await prisma.user.findMany()
     },
     postById: (_parent, args: { id: number }, context) => {
       return prisma.post.findUnique({
@@ -25,6 +25,7 @@ export const resolvers = {
       },
       context,
     ) => {
+      console.log(args)
       const or = args.searchString
         ? {
           OR: [
@@ -36,7 +37,7 @@ export const resolvers = {
 
       return prisma.post.findMany({
         where: {
-          published: true,
+          published: false,
           ...or,
         },
         take: args?.take,
@@ -44,23 +45,77 @@ export const resolvers = {
         orderBy: args?.orderBy,
       })
     },
-    draftsByUser: (
+    // draftsByUser: (
+    //   _parent,
+    //   args: { userUniqueInput: UserUniqueInput },
+    //   context,
+    // ) => {
+    //   return prisma.user
+    //     .findUnique({
+    //       where: {
+    //         id: args.userUniqueInput.id || undefined,
+    //         email: args.userUniqueInput.email || undefined,
+    //       },
+    //     })
+    //     .posts({
+    //       where: {
+    //         published: false,
+    //       },
+    //     })
+    // },
+    search: async (
       _parent,
-      args: { userUniqueInput: UserUniqueInput },
+      args: { contains: string },
       context,
     ) => {
-      return prisma.user
-        .findUnique({
-          where: {
-            id: args.userUniqueInput.id || undefined,
-            email: args.userUniqueInput.email || undefined,
-          },
-        })
-        .posts({
-          where: {
-            published: false,
-          },
-        })
+      console.log(args)
+      const or = args.contains
+        ? {
+          OR: [
+            { name: { contains: args.contains } },
+          ],
+        }
+        : {}
+
+      const orPost = args.contains
+        ? {
+          OR: [
+            { title: { contains: args.contains } },
+            { content: { contains: args.contains } },
+          ],
+        }
+        : {}
+
+      const res = await prisma.post.findMany({
+        where: {
+          published: false,
+          ...orPost,
+        },
+      })
+
+      const users = await prisma.user.findMany({
+        where: {
+          createdAt: { gte: new Date('2024-07-01') },
+          ...or,
+        },
+      })
+      console.log(users)
+      // return 'Post'
+      return [...users, ...res]
+    },
+  },
+  SearchResult: {
+    __resolveType(obj, contextValue, info) {
+      // console.log(`_______inside_${JSON.stringify(obj)}`)
+      // Only Author has a name field
+      if (obj.name) {
+        return 'Author';
+      }
+      // Only Posts has a title field
+      if (obj.title) {
+        return 'UserPosts';
+      }
+      return null; // GraphQLError is thrown
     },
   },
   DateTime: DateTimeResolver,

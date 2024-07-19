@@ -33,6 +33,7 @@ type Query {
     take: Int
   ): [Post!]!
   postById(id: Int): Post
+  search(contains: String): [SearchResult!] 
 }
 
 enum SortOrder {
@@ -55,3 +56,13 @@ input UserUniqueInput {
 }
 
 scalar DateTime
+
+union SearchResult = Author | UserPosts
+
+type UserPosts {
+  title: String!
+}
+
+type Author {
+  name: String!
+}

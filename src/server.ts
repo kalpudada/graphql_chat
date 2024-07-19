@@ -4,7 +4,7 @@
 import { resolvers } from './resolvers/resolver'
 import { Context, context, createContext } from './context'
 import { getUserId } from './utils/utils';
-import { permissions } from './permissions'
+// import { permissions } from './permissions'
 
 import { ApolloServer } from '@apollo/server';
 import { applyMiddleware } from 'graphql-middleware'
@@ -48,7 +48,7 @@ const app = express()
 const httpServer = createServer(app)
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
-const schemaWithMiddleware = applyMiddleware(schema, permissions)
+const schemaWithMiddleware = applyMiddleware(schema) // permissions
 async function start() {
   /** Create WS Server */
   const wsServer = new WebSocketServer({

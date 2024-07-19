@@ -50,6 +50,7 @@ export const permissions = shield({
     // me: rules.isAuthenticatedUser,
     draftsByUser: rules.isAuthenticatedUser,
     postById: rules.isAuthenticatedUser,
+    // search: rules.isAuthenticatedUser,
   },
   // Mutation: {
   //   createDraft: rules.isAuthenticatedUser,
