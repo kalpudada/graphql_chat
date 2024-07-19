@@ -108,3 +108,37 @@ input AddMessageInput {
   roomId: Int!
   message: String!
 }
+
+union SearchResult = User | Post
+
+type Post {
+  title: String!
+}
+
+type User {
+  name: String!
+}
+
+type Query {
+  search(contains: String): [SearchResult!] 
+}
+
+"type query defines all entry points"
+type Query {
+  getAllPosts(
+    "Description for argument"
+    postId: Int
+  )
+}
+
+"type User represents a user model of our schema"
+type User {
+  """
+  Description for field
+  Supports **multi-line**
+
+  name should be string and not null
+  """
+  name: String!
+}
+
