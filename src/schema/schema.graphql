@@ -8,6 +8,7 @@ type Mutation {
   createRoom(data: RoomCreateInput): Room
   addParticipant(data: AddParticipantInput): Room
   sendMessage(data: AddMessageInput): Message
+  sendPrivateMessage(data: AddMessageInput): Message
 }
 
 type Post {
@@ -29,6 +30,7 @@ type Room {
 type Message {
   id: Int!
   message: String!
+  roomId: Int
 }
 
 input RoomCreateInput {
@@ -94,7 +96,7 @@ type Subscription {
   # newPost: Post
   postCreated: Post
   addedToRoom: Room
-  newMessage: Message
+  newMessage(roomId: Int): Message
   userIsOnline: User
   userIsTyping: User
 }

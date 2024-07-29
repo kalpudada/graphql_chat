@@ -25,6 +25,7 @@ model User {
   Room        Room[]
   Participant Participant[]
   Message     Message[]
+  Sessions    Sessions?
 }
 
 model Room {
@@ -76,4 +77,10 @@ model Profile {
   bio    String?
   user   User    @relation(fields: [userId], references: [id])
   userId Int     @unique
+}
+
+model Sessions {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
 }

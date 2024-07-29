@@ -4,7 +4,15 @@ import { APP_SECRET, getUserId } from '../utils/utils'
 import { compare, hash } from 'bcryptjs'
 import { sign } from 'jsonwebtoken'
 import { CONSTANT } from '../constants/constant'
+import { parseResolveInfo, FieldsByTypeName, ResolveTree, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
+import { getFieldsFromResolvedInfo } from './helper'
 
+// const getFlatFieldsFromResolvedInfo = (info: GraphQLResolveInfo
+// ) => {
+//   const resolvedInfo = parseResolveInfo(info);
+//   const resourceTree: FieldsByTypeName[any] = resolvedInfo?.fieldsByTypeName //Object.values(resolvedInfo.fieldsByTypeName)[0];
+//   return Object.keys(resourceTree)
+// }
 export const resolvers = {
   Query: {
     allUsers: (_parent, _args, context) => {
@@ -15,6 +23,7 @@ export const resolvers = {
         where: { id: args.id || undefined },
       })
     },
+
     feed: (
       _parent,
       args: {
@@ -24,7 +33,17 @@ export const resolvers = {
         orderBy: PostOrderByUpdatedAtInput
       },
       context,
+      info
     ) => {
+      const parsedResolveInfo = parseResolveInfo(info)
+      console.log(parsedResolveInfo)
+
+      // const resolvedInfo = parseResolveInfo(info);
+      // const resourceTree: FieldsByTypeName[any] = Object.values(resolvedInfo.fieldsByTypeName)[0];
+      console.log(getFieldsFromResolvedInfo(info))
+      // getFieldsFromResolvedInfo(info)
+      // console.log(Object.keys(resourceTree))
+
       const or = args.searchString
         ? {
           OR: [
@@ -33,12 +52,15 @@ export const resolvers = {
           ],
         }
         : {}
-
+      const obj = {}
+      getFieldsFromResolvedInfo(info).flatFields.map(f => { obj[f] = true });
+      console.log(obj)
       return prisma.post.findMany({
         where: {
-          published: true,
+          published: false,
           ...or,
         },
+        select: obj,
         take: args?.take,
         skip: args?.skip,
         orderBy: args?.orderBy,
@@ -183,7 +205,7 @@ export const resolvers = {
       const participantData = args.data.participants.map((p) => {
         return { userId: p }
       })
-      participantData.push({userId});
+      participantData.push({ userId });
       return prisma.room.create({
         data: {
           roomName: args.data.roomName,
@@ -220,7 +242,8 @@ export const resolvers = {
           userId
         }
       })
-      context.pubsub.publish(CONSTANT.SUBSCRIPTION.NEW_MESSAGE, {
+      // ${CONSTANT.SUBSCRIPTION.NEW_MESSAGE}_${args.data.roomId}
+      context.pubsub.publish(`${CONSTANT.SUBSCRIPTION.NEW_MESSAGE}_${args.data.roomId}`, {
         newMessage: res,
       });
       return res
@@ -254,7 +277,16 @@ export const resolvers = {
       subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.ADDED_TO_ROOM]),
     },
     newMessage: {
-      subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.NEW_MESSAGE]),
+      // subscribe: async (data) => {
+      //   console.log(`data_${data}`);
+      //   return context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.NEW_MESSAGE]
+      //   )
+      // },
+  
+      subscribe: (_, { room }) => {
+        console.log(`room_is_${CONSTANT.SUBSCRIPTION.NEW_MESSAGE}_${room}`)
+        return context.pubsub.asyncIterator([`${CONSTANT.SUBSCRIPTION.NEW_MESSAGE}_${room}`]);
+      }
     },
     userIsOnline: {
       subscribe: () => context.pubsub.asyncIterator([CONSTANT.SUBSCRIPTION.USER_IS_ONLINE]),

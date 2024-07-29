@@ -58,5 +58,6 @@ export const permissions = shield({
     togglePublishPost: rules.isPostOwner,
     sendMessage: rules.isRoomMember,
     createRoom: rules.isAuthenticatedUser,
+    addParticipant: rules.isAuthenticatedUser
   },
 })
