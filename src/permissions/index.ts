@@ -4,7 +4,6 @@ import { Context, prisma } from '../context'
 
 const rules = {
   isAuthenticatedUser: rule()(async (_parent, _args, context: Context) => {
-    console.log('i_am_here')
     const userId = getUserId(context)
     context.userId = userId;
     const userData = await prisma.user
@@ -15,6 +14,7 @@ const rules = {
       })
     return Boolean(userId)
   }),
+
   isPostOwner: rule()(async (_parent, _args, context) => {
     const userId = getUserId(context)
     const author = await context.prisma.post
@@ -26,8 +26,9 @@ const rules = {
       .author()
     return userId === author.id
   }),
+
   isRoomMember: rule()(async (_parent, _args, context: Context) => {
-    const {body} =context.req;
+    const { body } = context.req;
     const userId = getUserId(context)
     const participant = await prisma.participant
       .findFirst({
