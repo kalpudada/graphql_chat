@@ -25,6 +25,7 @@ type Post {
 type FeedResponse {
   data: [Post!]!
   nextCursor: Int
+  totalCount: Int
 }
 
 type Room {

@@ -22,35 +22,48 @@ export const resolvers = {
         skip: number
         take: number
         orderBy: PostOrderByUpdatedAtInput
-        cursor: number
+        cursor: number,
       },
       context,
     ) => {
-      const or = args.searchString
-        ? {
-          OR: [
-            { title: { contains: args.searchString } },
-            { content: { contains: args.searchString } },
-          ],
+      try {
+        const or = args.searchString
+          ? {
+            OR: [
+              { title: { contains: args.searchString } },
+              { content: { contains: args.searchString } },
+            ],
+          }
+          : {}
+        const take = args.take || 10;
+        const inputs = {
+          take: take + 1,
+          skip: args?.skip,
+          orderBy: args?.orderBy
         }
-        : {}
+        if (args.cursor) inputs['cursor'] = { id: args.cursor }
+        const data = await prisma.post.findMany({
+          where: {
+            published: false,
+            ...or,
+          },
+          ...inputs,
+        })
+        const lastPostInResults = data[args.take] // Remember: zero-based index! :)
+        const nextCursor = lastPostInResults?.id
+        data.pop();
 
-      const data = await prisma.post.findMany({
-        where: {
-          published: false,
-          ...or,
-        },
-        cursor: { id: args?.cursor },
-        take: args?.take + 1,
-        skip: args?.skip,
-        orderBy: args?.orderBy,
-      })
-      const lastPostInResults = data[args.take] // Remember: zero-based index! :)
-      const nextCursor = lastPostInResults.id
-      console.log(JSON.stringify(data))
-      console.log(nextCursor)
-      data.pop();
-      return { data, nextCursor }
+        // get count 
+        const totalCount = await prisma.post.count({
+          where: {
+            published: false,
+            ...or,
+          }
+        })
+        return { data, nextCursor, totalCount }
+      } catch (error) {
+        console.error(error);
+      }
     },
     draftsByUser: (
       _parent,
