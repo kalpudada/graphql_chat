@@ -13,7 +13,6 @@ const rules = {
           id: Number(userId)
         },
       })
-    console.log(`userData_${JSON.stringify(userData)}`)
     return Boolean(userId)
   }),
   isPostOwner: rule()(async (_parent, _args, context) => {
@@ -28,11 +27,8 @@ const rules = {
     return userId === author.id
   }),
   isRoomMember: rule()(async (_parent, _args, context: Context) => {
-    // console.log(`i_am_here_inrom_member_`)
     const {body} =context.req;
-    // console.log(`i_am_here_inrom_member_ ${JSON.stringify(body)}`)
     const userId = getUserId(context)
-    // console.log(`i_am_here_inrom_member_${userId}`)
     const participant = await prisma.participant
       .findFirst({
         where: {
@@ -40,7 +36,6 @@ const rules = {
           userId: Number(userId)
         },
       })
-    // console.log('i_am_here_inrom_member_2')
     return !!participant
   }),
 }

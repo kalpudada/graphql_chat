@@ -15,13 +15,14 @@ export const resolvers = {
         where: { id: args.id || undefined },
       })
     },
-    feed: (
+    feed: async (
       _parent,
       args: {
         searchString: string
         skip: number
         take: number
         orderBy: PostOrderByUpdatedAtInput
+        cursor: number
       },
       context,
     ) => {
@@ -34,15 +35,22 @@ export const resolvers = {
         }
         : {}
 
-      return prisma.post.findMany({
+      const data = await prisma.post.findMany({
         where: {
-          published: true,
+          published: false,
           ...or,
         },
-        take: args?.take,
+        cursor: { id: args?.cursor },
+        take: args?.take + 1,
         skip: args?.skip,
         orderBy: args?.orderBy,
       })
+      const lastPostInResults = data[args.take] // Remember: zero-based index! :)
+      const nextCursor = lastPostInResults.id
+      console.log(JSON.stringify(data))
+      console.log(nextCursor)
+      data.pop();
+      return { data, nextCursor }
     },
     draftsByUser: (
       _parent,
@@ -183,7 +191,7 @@ export const resolvers = {
       const participantData = args.data.participants.map((p) => {
         return { userId: p }
       })
-      participantData.push({userId});
+      participantData.push({ userId });
       return prisma.room.create({
         data: {
           roomName: args.data.roomName,
@@ -237,6 +245,10 @@ export const resolvers = {
     },
   },
   User: {
+    firstLetter: parent => {
+      // console.log(`parent__${JSON.stringify(parent)}`);
+      return parent.name[0];
+    },
     posts: (parent, _args, context) => {
       return prisma.user
         .findUnique({

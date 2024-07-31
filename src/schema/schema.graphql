@@ -19,6 +19,12 @@ type Post {
   title: String!
   updatedAt: DateTime!
   viewCount: Int!
+  lastCursor: Int
+}
+
+type FeedResponse {
+  data: [Post!]!
+  nextCursor: Int
 }
 
 type Room {
@@ -53,7 +59,8 @@ type Query {
     searchString: String
     skip: Int
     take: Int
-  ): [Post!]!
+    cursor: Int
+  ): FeedResponse
   postById(id: Int): Post
 }
 
@@ -69,6 +76,7 @@ type User {
   name: String
   posts: [Post!]!
   token: String
+  firstLetter: String
 }
 
 input UserCreateInput {

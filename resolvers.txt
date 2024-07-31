@@ -1,0 +1,13 @@
+Resolvers data:
+
+1. selecting fields 
+2. sub selection of pagination
+3. Auth
+4. Defending against deeply nested queries (define a selection depth )
+
+graphql depth limit 
+
+Authorization:
+Add data in context req, res during server initialization
+
+Pagination:
